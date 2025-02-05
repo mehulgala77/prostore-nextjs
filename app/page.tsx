@@ -1,5 +1,5 @@
 const Homepage = () => {
-  return <>Prostore</>;
+  return <div>Prostore</div>;
 };
 
 export default Homepage;
