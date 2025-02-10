@@ -55,12 +55,18 @@ export const config = {
     }),
   ],
   callbacks: {
-    // Note: The session callback is called whenever a session is checked. 
+    // Note: The session callback is called whenever a session is checked.
     // By default, only a subset of the token is returned for increased security.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     async session({ session, user, trigger, token }: any) {
       // Set the user ID from the token
       session.user.id = token.sub;
+
+      // Note: If you want to make something available you added to the token 
+      // (like access_token and user.id from above) via the jwt() callback, 
+      // you have to explicitly forward it here to make it available to the client.
+      session.user.role = token.role;
+      session.user.name = token.name;
 
       // If there is an update, set the user name
       if (trigger === "update") {
@@ -68,6 +74,27 @@ export const config = {
       }
 
       return session;
+    },
+    // Note: This callback is called whenever a JSON Web Token is created (i.e. at sign in) 
+    // or updated (i.e whenever a session is accessed in the client).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async jwt({ token, user }: any) {
+      // Assign user fields to token
+      if (user) {
+        token.role = user.role;
+
+        // If user has no name then use the email
+        if (user.name === "NO_NAME") {
+          token.name = user.email!.split("@")[0];
+
+          // Update database to reflect the token name
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { name: token.name },
+          });
+        }
+      }
+      return token;
     },
   },
 } satisfies NextAuthConfig;
