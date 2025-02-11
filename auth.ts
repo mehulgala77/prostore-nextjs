@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compareSync } from "bcrypt-ts-edge";
 import type { NextAuthConfig } from "next-auth";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 // Note: Next Auth Configurtions
 export const config = {
@@ -79,9 +80,10 @@ export const config = {
     // Note: This callback is called whenever a JSON Web Token is created (i.e. at sign in)
     // or updated (i.e whenever a session is accessed in the client).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, trigger }: any) {
       // Assign user fields to token
       if (user) {
+        token.id = user.id;
         token.role = user.role;
 
         // If user has no name then use the email
@@ -94,7 +96,34 @@ export const config = {
             data: { name: token.name },
           });
         }
+
+        // Note: Assign Guest Session Cart Id to the Signed In User
+        // This will ensure existing cart items will be assigned to the logged in user.
+        if (trigger === "signIn" || trigger === "signUp") {
+          const cookiesObject = await cookies();
+          const sessionCartId = cookiesObject.get("sessionCartId")?.value;
+
+          if (sessionCartId) {
+            const sessionCart = await prisma.cart.findFirst({
+              where: { sessionCartId },
+            });
+
+            if (sessionCart) {
+              // Delete current user cart
+              await prisma.cart.deleteMany({
+                where: { userId: user.id },
+              });
+
+              // Assign new cart
+              await prisma.cart.update({
+                where: { id: sessionCart.id },
+                data: { userId: user.id },
+              });
+            }
+          }
+        }
       }
+
       return token;
     },
     // Note: Generate a new Session Card Id when user visits the website and store it in a cookie. 
