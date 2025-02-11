@@ -126,10 +126,28 @@ export const config = {
 
       return token;
     },
-    // Note: Generate a new Session Card Id when user visits the website and store it in a cookie. 
+    // Note: Generate a new Session Card Id when user visits the website and store it in a cookie.
     // Cart data will be stored against this Session Cart Id for logged in users as well as Guests.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    authorized({ request }: any) {
+    authorized({ request, auth }: any) {
+      // Note: Logic to protect routes from unauthenticated users
+      // Array of regex patterns of paths we want to protect
+      const protectedPaths = [
+        /\/shipping-address/,
+        /\/payment-method/,
+        /\/place-order/,
+        /\/profile/,
+        /\/user\/(.*)/,
+        /\/order\/(.*)/,
+        /\/admin/,
+      ];
+
+      // Get pathname from the req URL object
+      const { pathname } = request.nextUrl;
+
+      // Check if user is not authenticated and accessing a protected path
+      if (!auth && protectedPaths.some((p) => p.test(pathname))) return false;
+
       // Check for session cart cookie
       if (!request.cookies.get("sessionCartId")) {
         // Generate new session cart id cookie
@@ -147,7 +165,6 @@ export const config = {
         // Set newly generated sessionCartId in the response cookies
         response.cookies.set("sessionCartId", sessionCartId);
         return response;
-
       } else {
         return true;
       }
