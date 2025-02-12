@@ -118,7 +118,7 @@ export async function updateUserAddress(data: ShippingAddress) {
   }
 }
 
-// Update the user's payment method
+// Update user's payment method
 export async function updateUserPaymentMethod(
   data: z.infer<typeof paymentMethodSchema>
 ) {
