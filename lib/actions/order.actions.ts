@@ -1,6 +1,6 @@
 "use server";
 
-import { formatError } from "../utils";
+import { convertToPlainObject, formatError } from "../utils";
 import { auth } from "@/auth";
 import { getMyCart } from "./cart.actions";
 import { getUserById } from "./user.actions";
@@ -93,9 +93,25 @@ export async function createOrder() {
       message: "Order created",
       redirectTo: `/order/${insertedOrderId}`,
     };
-    
+
   } catch (error) {
     if (isRedirectError(error)) throw error;
     return { success: false, message: formatError(error) };
   }
+}
+
+// Get order by id
+export async function getOrderById(orderId: string) {
+  const data = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+    },
+    // Note: This is how we fetch data for the related models in this query
+    include: {
+      orderitems: true,
+      user: { select: { name: true, email: true } },
+    },
+  });
+  
+  return convertToPlainObject(data);
 }
