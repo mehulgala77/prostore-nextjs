@@ -24,6 +24,9 @@ const OrderDetailsPage = async (props: {
         ...order,
         shippingAddress: order.shippingAddress as ShippingAddress,
       }}
+      // Note: Passing client id like this because OrderDetailsTable is a client component.
+      // And we don't want to access process.env in the client component.
+      paypalClientId={process.env.PAYPAL_CLIENT_ID || "sb"}
     />
   );
 };
