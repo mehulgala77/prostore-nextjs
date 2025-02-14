@@ -82,7 +82,7 @@ const AdminOverviewPage = async () => {
           <CardHeader>
             <CardTitle>Overview</CardTitle>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent>
             <Charts
               data={{
                 salesData: summary.salesData,
@@ -105,7 +105,7 @@ const AdminOverviewPage = async () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {summary.latestOrders.map((order) => (
+                {summary.latestSales.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell>{order?.user?.name}</TableCell>
                     <TableCell>

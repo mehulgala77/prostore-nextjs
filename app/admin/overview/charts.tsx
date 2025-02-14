@@ -5,7 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 const Charts = ({
   data: { salesData },
 }: {
-  data: { salesData: SalesDataType[] };
+  data: { salesData: SalesDataType };
 }) => {
   return (
     <ResponsiveContainer width="100%" height={350}>

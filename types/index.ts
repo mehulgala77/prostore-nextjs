@@ -37,4 +37,4 @@ export type PaymentResult = z.infer<typeof paymentResultSchema>;
 export type SalesDataType = {
   month: string;
   totalSales: number;
-};
+}[];
