@@ -80,7 +80,7 @@ export const config = {
     // Note: This callback is called whenever a JSON Web Token is created (i.e. at sign in)
     // or updated (i.e whenever a session is accessed in the client).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async jwt({ token, user, trigger }: any) {
+    async jwt({ token, user, trigger, session }: any) {
       // Assign user fields to token
       if (user) {
         token.id = user.id;
@@ -122,6 +122,13 @@ export const config = {
             }
           }
         }
+      }
+
+      // Note: Handle session updates
+      // In JWT strategy, client session comes from the JWT token. 
+      // So, we need to update the token so that the user sees latest data on the client side.
+      if (session?.user.name && trigger === "update") {
+        token.name = session.user.name;
       }
 
       return token;
